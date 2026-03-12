@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veda Share | Futuristic Student Community</title>
+    <meta name="description" content="A futuristic community platform for students to share knowledge, collaborate, and compete.">
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        /* Auth Page Specific Styles */
+        #auth-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .auth-logo {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+
+        .toggle-auth {
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toggle-auth span {
+            color: var(--neon-blue);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Dashboard Styles */
+        #dashboard {
+            display: none;
+            opacity: 0;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            padding: 30px 20px;
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            color: var(--text-secondary);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--neon-blue);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 40px;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            padding: 25px;
+            text-align: center;
+        }
+
+        .community-card {
+            padding: 20px;
+            transition: 0.3s;
+        }
+
+        .community-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-purple);
+        }
+
+        .badge {
+            background: var(--neon-purple);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* Library Table */
+        .library-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .library-table th, .library-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .library-table th {
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="mesh-gradient"></div>
+    <div class="circuit-overlay"></div>
+    <div class="scan-line"></div>
+    <canvas id="knowledge-canvas"></canvas>
+
+    <!-- HUD Ornaments -->
+    <div class="hud-ring" style="width: 600px; height: 600px; top: -100px; left: -100px;">
+        <div class="hud-ring-inner" style="width: 400px; height: 400px;"></div>
+    </div>
+    <div class="hud-ring" style="width: 400px; height: 400px; bottom: -100px; right: -100px;">
+        <div class="hud-ring-inner" style="width: 200px; height: 200px;"></div>
+    </div>
+
+    <div id="video-call-overlay">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 id="call-title" class="glitch" data-text="SYNERGY SESSION">SYNERGY SESSION</h2>
+            <div style="color: var(--neon-blue); font-family: var(--font-header);">SESSION DURATION: 00:12:45</div>
+        </div>
+        <div class="video-grid" id="video-grid">
+            <!-- Simulated participant videos -->
+            <div class="participant-video">
+                <div style="color: var(--text-secondary); text-align: center;">
+                    <i data-lucide="user" size="48"></i>
+                    <p>YOU (TRANSMITTING)</p>
+                </div>
+                <div class="participant-name">Student_01 (Host)</div>
+            </div>
+            <div class="participant-video">
+                <div style="color: var(--text-secondary); text-align: center;">
+                    <i data-lucide="user" size="48"></i>
+                    <p>RECIPIENT_A</p>
+                </div>
+                <div class="participant-name">Aero_Master_99</div>
+            </div>
+        </div>
+        <div class="call-controls">
+            <button class="control-btn"><i data-lucide="mic"></i></button>
+            <button class="control-btn"><i data-lucide="video"></i></button>
+            <button class="control-btn"><i data-lucide="share-2"></i></button>
+            <button class="control-btn end-call" onclick="app.endVideoCall()"><i data-lucide="phone-off"></i></button>
+        </div>
+    </div>
+
+    <!-- Authentication Page -->
+    <div id="auth-page">
+        <div class="auth-container glass holographic">
+            <h1 class="auth-logo floating glitch" data-text="VEDA SHARE">VEDA SHARE</h1>
+            
+            <div id="login-form">
+                <div class="input-group">
+                    <label>Identification ID</label>
+                    <input type="text" placeholder="Enter your ID">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" placeholder="••••••••">
+                </div>
+                <button class="neon-btn" style="width: 100%;" onclick="app.login()">Initialize Portal</button>
+                <p class="toggle-auth">New to the network? <span onclick="app.toggleAuth('signup')">Create Identity</span></p>
+            </div>
+
+            <div id="signup-form" style="display: none;">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Enter your name">
+                </div>
+                <div class="input-group">
+                    <label>Date of Birth</label>
+                    <input type="date">
+                </div>
+                <div class="input-group">
+                    <label>School/Institution Name</label>
+                    <input type="text" placeholder="Institute Name">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>Place</label>
+                        <input type="text" placeholder="City">
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>Country</label>
+                        <input type="text" placeholder="Country">
+                    </div>
+                </div>
+                <button class="neon-btn" style="width: 100%;" onclick="app.login()">Register Identity</button>
+                <p class="toggle-auth">Already registered? <span onclick="app.toggleAuth('login')">Access Portal</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard">
+        <button class="mobile-nav-toggle" id="nav-toggle" onclick="app.toggleSidebar()">
+            <i data-lucide="menu"></i>
+        </button>
+        <div class="sidebar glass" id="sidebar">
+            <h2 style="font-size: 1.2rem; margin-bottom: 40px; color: var(--neon-blue);">VEDA SYSTEM</h2>
+            
+            <div class="nav-item active" onclick="app.switchView('home')">
+                <i data-lucide="home"></i>
+                <span>Nexus Home</span>
+            </div>
+            <div class="nav-item" onclick="app.switchView('communities')">
+                <i data-lucide="users"></i>
+                <span>Communities</span>
+            </div>
+            <div class="nav-item" onclick="app.switchView('events')">
+                <i data-lucide="zap"></i>
+                <span>Event Hub</span>
+            </div>
+            <div class="nav-item" onclick="app.switchView('library')">
+                <i data-lucide="book-open"></i>
+                <span>Library</span>
+            </div>
+            
+            <div style="margin-top: auto;">
+                <div class="nav-item" onclick="app.logout()">
+                    <i data-lucide="log-out"></i>
+                    <span>Terminate Session</span>
+                </div>
+            </div>
+        </div>
+
+        <main class="main-content">
+            <!-- Home Section -->
+            <section id="home-view" class="view-section active">
+                <header>
+                    <h1 id="welcome-msg" class="glitch" data-text="Welcome, Explorer">Welcome, Explorer</h1>
+                    <p style="color: var(--text-secondary);">Your current transmission status is nominal.</p>
+                </header>
+
+                <div class="grid-container">
+                    <div class="stat-card glass">
+                        <i data-lucide="award" style="color: gold; margin-bottom: 10px;"></i>
+                        <h3>Global Rank</h3>
+                        <p style="font-size: 2rem; color: var(--neon-blue);">#42</p>
+                    </div>
+                    <div class="stat-card glass">
+                        <i data-lucide="coins" style="color: var(--neon-pink); margin-bottom: 10px;"></i>
+                        <h3>Veda Credits</h3>
+                        <p style="font-size: 2rem; color: var(--neon-pink);">1,250</p>
+                    </div>
+                    <div class="stat-card glass">
+                        <i data-lucide="users-2" style="color: var(--neon-purple); margin-bottom: 10px;"></i>
+                        <h3>Active Hubs</h3>
+                        <p style="font-size: 2rem; color: var(--neon-purple);">12</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Communities Section -->
+            <section id="communities-view" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>Study Hubs</h1>
+                    <button class="neon-btn" onclick="app.openModal('create-community')">Initialize Hub</button>
+                </div>
+                <div class="grid-container" id="community-list">
+                    <!-- Community cards will be injected here -->
+                </div>
+            </section>
+
+            <!-- Events Section -->
+            <section id="events-view" class="view-section">
+                <h1>Futuristic Event Hub</h1>
+                <p style="color: var(--text-secondary); margin-bottom: 30px;">Compete in high-stakes simulations and knowledge battles.</p>
+                
+                <div class="grid-container" id="events-list">
+                    <!-- Event cards will be injected here -->
+                </div>
+            </section>
+
+            <!-- Library Section -->
+            <section id="library-view" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>Resource Library</h1>
+                    <button class="neon-btn">Upload Transmission</button>
+                </div>
+                
+                <div class="glass" style="margin-top: 30px; padding: 20px;">
+                    <table class="library-table">
+                        <thead>
+                            <tr>
+                                <th>Resource Name</th>
+                                <th>Category</th>
+                                <th>Data Type</th>
+                                <th>Hub</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="library-list">
+                            <!-- Library items will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals (Simplified for demo) -->
+    <div id="modal-container" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;">
+        <div class="glass" style="max-width: 500px; width: 90%; padding: 40px; position: relative;">
+            <button onclick="app.closeModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; cursor: pointer;"><i data-lucide="x"></i></button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
